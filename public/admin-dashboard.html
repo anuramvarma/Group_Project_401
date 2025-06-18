@@ -1,0 +1,1402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FarmGrower Admin Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2c5f2d;
+            --secondary-color: #97bc62;
+            --accent-color: #ff6b6b;
+            --background-color: #f8f9fa;
+            --text-color: #333;
+            --sidebar-width: 250px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-color);
+            display: flex;
+        }
+        .sidebar {
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: var(--primary-color);
+            padding: 2rem;
+            position: fixed;
+            left: 0;
+            top: 0;
+        }
+
+        .sidebar-header {
+            color: white;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-menu {
+            list-style: none;
+        }
+
+        .nav-item {
+            margin-bottom: 1rem;
+        }
+
+        .nav-link {
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.8rem;
+            border-radius: 8px;
+            transition: background-color 0.3s;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .main-content {
+            margin-left: var(--sidebar-width);
+            padding: 2rem;
+            width: calc(100% - var(--sidebar-width));
+        }
+
+        .dashboard-header {
+            margin-bottom: 2rem;
+        }
+
+        .dashboard-header h1 {
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-card h3 {
+            color: var(--text-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-card .value {
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        
+        .table-container {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-danger {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            width: 90%;
+            max-width: 600px;
+            margin: 5% auto;
+            padding: 2rem;
+            border-radius: 10px;
+            position: relative;
+        }
+
+        .close {
+            position: absolute;
+            right: 1rem;
+            top: 1rem;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        .status-tag {
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .status-pending {
+            background-color: #ffd700;
+            color: #000;
+        }
+
+        .status-confirmed {
+            background-color: #4caf50;
+            color: white;
+        }
+
+        .status-cancelled {
+            background-color: #ff5252;
+            color: white;
+        }
+
+    
+        .detail-group {
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .detail-group h3 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--secondary-color);
+        }
+
+        .detail-group p {
+            margin-bottom: 0.5rem;
+            line-height: 1.6;
+        }
+
+        .detail-group strong {
+            color: var(--primary-color);
+        }
+
+        .order-items-list {
+            max-height: 100px;
+            overflow-y: auto;
+            padding: 0.5rem;
+            background: #fff;
+            border-radius: 4px;
+            border: 1px solid #eee;
+        }
+
+        .order-items-table {
+            margin-top: 1rem;
+        }
+
+        .order-items-table .order-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .order-items-table .order-item:last-child {
+            border-bottom: none;
+        }
+
+    
+        .status-select {
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: white;
+            width: 100%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .status-select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(44, 95, 45, 0.1);
+        }
+        .table-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+
+        .table-header {
+            background: var(--primary-color);
+            color: white;
+            padding: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .table-header h2 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #f8f9fa;
+            color: var(--primary-color);
+            font-weight: 600;
+            text-align: left;
+            padding: 1rem;
+            border-bottom: 2px solid var(--secondary-color);
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid #eee;
+            vertical-align: top;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 0.25rem;
+        }
+
+        .btn i {
+            font-size: 0.9rem;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: var(--accent-color);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #ff5252;
+            transform: translateY(-2px);
+        }
+
+        .status-tag {
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: inline-block;
+        }
+
+        .status-pending {
+            background-color: #ffd700;
+            color: #000;
+        }
+
+        .status-confirmed {
+            background-color: #4caf50;
+            color: white;
+        }
+
+        .status-shipped {
+            background-color: #2196f3;
+            color: white;
+        }
+
+        .status-delivered {
+            background-color: #4caf50;
+            color: white;
+        }
+
+        .status-completed {
+            background-color: #4caf50;
+            color: white;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-card h3 {
+            color: var(--text-color);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .stat-card .value {
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .table-container {
+                overflow-x: auto;
+            }
+
+            .btn {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.9rem;
+            }
+
+            .status-select {
+                font-size: 0.9rem;
+            }
+        }
+
+       
+        .profile-container {
+            max-width: 600px;
+            margin: 2rem auto;
+        }
+
+        .profile-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .profile-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .profile-icon {
+            font-size: 5rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        #adminProfileForm .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        #adminProfileForm input[readonly] {
+            background-color: #f8f9fa;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <i class="fas fa-leaf"></i>
+            <h2>FarmGrower Admin</h2>
+        </div>
+        <ul class="nav-menu">
+            <li class="nav-item">
+                <a href="#dashboard" class="nav-link active" onclick="showSection('dashboard')">
+                    <i class="fas fa-home"></i>
+                    Dashboard
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#orders" class="nav-link" onclick="showSection('orders')">
+                    <i class="fas fa-shopping-cart"></i>
+                    Orders
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#bookings" class="nav-link" onclick="showSection('bookings')">
+                    <i class="fas fa-calendar-check"></i>
+                    Equipment Bookings
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#products" class="nav-link" onclick="showSection('products')">
+                    <i class="fas fa-box"></i>
+                    Products
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#equipment" class="nav-link" onclick="showSection('equipment')">
+                    <i class="fas fa-tractor"></i>
+                    Equipment
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#profile" class="nav-link" onclick="showSection('profile')">
+                    <i class="fas fa-user-circle"></i>
+                    Admin Profile
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="index.html" class="nav-link">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Logout
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+        <section id="dashboard-section">
+            <div class="dashboard-header">
+                <h1>Dashboard Overview</h1>
+                <p>Welcome back, Admin!</p>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>Total Orders</h3>
+                    <div class="value" id="totalOrders">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Total Bookings</h3>
+                    <div class="value" id="totalBookings">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Revenue</h3>
+                    <div class="value" id="totalRevenue">₹0</div>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <div class="table-header">
+                    <h2>Recent Orders</h2>
+                </div>
+                <table id="recentOrdersTable">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Customer</th>
+                            <th>Items</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+            <div class="table-container">
+                <div class="table-header">
+                    <h2>Recent Equipment Bookings</h2>
+                </div>
+                <table id="recentBookingsTable">
+                    <thead>
+                        <tr>
+                            <th>Booking ID</th>
+                            <th>Farmer</th>
+                            <th>Equipment</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="orders-section" style="display: none;">
+            <div class="dashboard-header">
+                <h1>Order Management</h1>
+            </div>
+            <div class="table-container">
+                <table id="ordersTable">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Customer</th>
+                            <th>Items</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="bookings-section" style="display: none;">
+            <div class="dashboard-header">
+                <h1>Equipment Bookings</h1>
+            </div>
+            <div class="table-container">
+                <table id="bookingsTable">
+                    <thead>
+                        <tr>
+                            <th>Booking ID</th>
+                            <th>Farmer</th>
+                            <th>Equipment</th>
+                            <th>Date</th>
+                            <th>Hours</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </section>
+        <section id="products-section" style="display: none;">
+            <div class="dashboard-header">
+                <h1>Product Management</h1>
+                <button class="btn btn-primary" onclick="showAddProductModal()">
+                    <i class="fas fa-plus"></i> Add New Product
+                </button>
+            </div>
+            <div class="table-container">
+                <table id="productsTable">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Category</th>
+                            <th>Price (₹)</th>
+                            <th>Stock</th>
+                            <th>Image URL</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="equipment-section" style="display: none;">
+            <div class="dashboard-header">
+                <h1>Equipment Management</h1>
+                <button class="btn btn-primary" onclick="showAddEquipmentModal()">
+                    <i class="fas fa-plus"></i> Add New Equipment
+                </button>
+            </div>
+            <div class="table-container">
+                <table id="equipmentTable">
+                    <thead>
+                        <tr>
+                            <th>Equipment</th>
+                            <th>Type</th>
+                            <th>Rate/Hour (₹)</th>
+                            <th>Status</th>
+                            <th>Image URL</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="profile-section" style="display: none;">
+            <div class="dashboard-header">
+                <h1>Admin Profile</h1>
+            </div>
+            <div class="profile-container">
+                <div class="profile-card">
+                    <div class="profile-header">
+                        <i class="fas fa-user-circle profile-icon"></i>
+                        <h2>Admin Information</h2>
+                    </div>
+                    <form id="adminProfileForm">
+                        <div class="form-group">
+                            <label for="adminName">Full Name</label>
+                            <input type="text" id="adminName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="adminEmail">Email</label>
+                            <input type="email" id="adminEmail" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="adminPhone">Phone</label>
+                            <input type="tel" id="adminPhone" pattern="[0-9]{10}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="adminRole">Role</label>
+                            <input type="text" id="adminRole" value="System Administrator" readonly>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Save Changes
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </div>
+    <div id="addProductModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Add New Product</h2>
+            <form id="addProductForm">
+                <div class="form-group">
+                    <label for="productName">Product Name</label>
+                    <input type="text" id="productName" required>
+                </div>
+                <div class="form-group">
+                    <label for="productCategory">Category</label>
+                    <select id="productCategory" required>
+                        <option value="seeds">Seeds</option>
+                        <option value="fertilizers">Fertilizers</option>
+                        <option value="pesticides">Pesticides</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="productPrice">Price</label>
+                    <input type="number" id="productPrice" required>
+                </div>
+                <div class="form-group">
+                    <label for="productStock">Initial Stock</label>
+                    <input type="number" id="productStock" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Add Product</button>
+            </form>
+        </div>
+    </div>
+    <div id="addEquipmentModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Add New Equipment</h2>
+            <form id="addEquipmentForm">
+                <div class="form-group">
+                    <label for="equipmentName">Equipment Name</label>
+                    <input type="text" id="equipmentName" required>
+                </div>
+                <div class="form-group">
+                    <label for="equipmentType">Type</label>
+                    <select id="equipmentType" required>
+                        <option value="tractor">Tractor</option>
+                        <option value="harvester">Harvester</option>
+                        <option value="drone">Drone</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="equipmentRate">Hourly Rate</label>
+                    <input type="number" id="equipmentRate" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Add Equipment</button>
+            </form>
+        </div>
+    </div>
+
+
+    <div id="editProductModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Edit Product</h2>
+            <form id="editProductForm">
+                <input type="hidden" id="editProductIndex">
+                <div class="form-group">
+                    <label for="editProductName">Product Name</label>
+                    <input type="text" id="editProductName" required>
+                </div>
+                <div class="form-group">
+                    <label for="editProductCategory">Category</label>
+                    <select id="editProductCategory" required>
+                        <option value="seeds">Seeds</option>
+                        <option value="fertilizers">Fertilizers</option>
+                        <option value="pesticides">Pesticides</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="editProductPrice">Price</label>
+                    <input type="number" id="editProductPrice" required>
+                </div>
+                <div class="form-group">
+                    <label for="editProductStock">Stock</label>
+                    <input type="number" id="editProductStock" required>
+                </div>
+                <div class="form-group">
+                    <label for="editProductImage">Image URL</label>
+                    <input type="url" id="editProductImage" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+            </form>
+        </div>
+    </div>
+
+
+    <div id="editEquipmentModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Edit Equipment</h2>
+            <form id="editEquipmentForm">
+                <input type="hidden" id="editEquipmentIndex">
+                <div class="form-group">
+                    <label for="editEquipmentName">Equipment Name</label>
+                    <input type="text" id="editEquipmentName" required>
+                </div>
+                <div class="form-group">
+                    <label for="editEquipmentType">Type</label>
+                    <select id="editEquipmentType" required>
+                        <option value="tractor">Tractor</option>
+                        <option value="harvester">Harvester</option>
+                        <option value="drone">Drone</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="editEquipmentRate">Hourly Rate</label>
+                    <input type="number" id="editEquipmentRate" required>
+                </div>
+                <div class="form-group">
+                    <label for="editEquipmentImage">Image URL</label>
+                    <input type="url" id="editEquipmentImage" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+            </form>
+        </div>
+    </div>
+    <div id="statusModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Update Booking Status</h2>
+            <div class="status-options">
+                <button class="status-option status-pending" onclick="updateStatus('pending')">Pending</button>
+                <button class="status-option status-confirmed" onclick="updateStatus('confirmed')">Confirmed</button>
+                <button class="status-option status-completed" onclick="updateStatus('completed')">Completed</button>
+                <button class="status-option status-cancelled" onclick="updateStatus('cancelled')">Cancelled</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+      
+        function checkAdminAuth() {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            if (!currentUser || currentUser.type !== 'admin') {
+                window.location.href = 'login.html';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', checkAdminAuth);
+
+        
+        function logout() {
+            localStorage.removeItem('currentUser');
+            window.location.href = 'login.html';
+        }
+
+        
+        document.querySelector('a[href="index.html"]').onclick = function(e) {
+            e.preventDefault();
+            logout();
+        };
+
+    
+        let orders = JSON.parse(localStorage.getItem('orders') || '[]');
+        let bookings = JSON.parse(localStorage.getItem('bookings') || '[]');
+        let products = JSON.parse(localStorage.getItem('products') || '[]');
+        let equipment = JSON.parse(localStorage.getItem('equipment') || '[]');
+
+    
+        function updateDashboardStats() {
+            document.getElementById('totalOrders').textContent = orders.length;
+            document.getElementById('totalBookings').textContent = bookings.length;
+            const revenue = orders.reduce((sum, order) => sum + order.total, 0);
+            document.getElementById('totalRevenue').textContent = `₹${revenue}`;
+        }
+
+   
+        function showSection(sectionId) {
+            document.querySelectorAll('section').forEach(section => {
+                section.style.display = 'none';
+            });
+            document.getElementById(`${sectionId}-section`).style.display = 'block';
+
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            document.querySelector(`[href="#${sectionId}"]`).classList.add('active');
+
+            if (sectionId === 'dashboard') {
+                updateDashboardStats();
+                loadRecentOrders();
+                loadRecentBookings();
+            } else if (sectionId === 'orders') {
+                loadAllOrders();
+            } else if (sectionId === 'bookings') {
+                loadAllBookings();
+            } else if (sectionId === 'products') {
+                loadProducts();
+            } else if (sectionId === 'equipment') {
+                loadEquipment();
+            } else if (sectionId === 'profile') {
+                loadAdminProfile();
+            }
+        }
+
+     
+        function loadRecentOrders() {
+            const recentOrders = orders.slice(-5).reverse();
+            const tbody = document.querySelector('#recentOrdersTable tbody');
+            tbody.innerHTML = recentOrders.map((order, index) => `
+                <tr>
+                    <td>#${order.orderDate.substring(0, 10)}-${index + 1}</td>
+                    <td>${order.customer.name}</td>
+                    <td>${order.items.map(item => item.product).join(', ')}</td>
+                    <td>₹${order.total}</td>
+                    <td><span class="status-tag status-pending">Pending</span></td>
+                    <td>
+                        <button class="btn btn-primary" onclick="updateOrderStatus(${index}, 'confirmed')">
+                            Confirm
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+
+        function loadRecentBookings() {
+            const recentBookings = bookings.slice(-5).reverse();
+            const tbody = document.querySelector('#recentBookingsTable tbody');
+            tbody.innerHTML = recentBookings.map((booking, index) => `
+                <tr>
+                    <td>#${booking.bookingDate.substring(0, 10)}-${index + 1}</td>
+                    <td>${booking.farmer}</td>
+                    <td>${booking.equipment}</td>
+                    <td>${booking.date}</td>
+                    <td><span class="status-tag status-pending">Pending</span></td>
+                    <td>
+                        <button class="btn btn-primary" onclick="updateBookingStatus(${index}, 'confirmed')">
+                            Confirm
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        
+        function loadAllOrders() {
+            const tbody = document.querySelector('#ordersTable tbody');
+            tbody.innerHTML = orders.map((order, index) => `
+                <tr>
+                    <td>${order.orderId || `#${order.orderDate.substring(0, 10)}-${index + 1}`}</td>
+                    <td>
+                        <strong>${order.customer.name}</strong><br>
+                        <small>${order.customer.phone}</small>
+                    </td>
+                    <td>
+                        <div class="order-items-list">
+                            ${order.items.map(item => `
+                                <div class="order-item">
+                                    ${item.product} - ₹${item.price}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </td>
+                    <td>₹${order.total}</td>
+                    <td>
+                        <select onchange="updateOrderStatus(${index}, this.value)" class="status-select">
+                            <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>Pending</option>
+                            <option value="confirmed" ${order.status === 'confirmed' ? 'selected' : ''}>Confirmed</option>
+                            <option value="shipped" ${order.status === 'shipped' ? 'selected' : ''}>Shipped</option>
+                            <option value="delivered" ${order.status === 'delivered' ? 'selected' : ''}>Delivered</option>
+                            <option value="cancelled" ${order.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
+                        </select>
+                    </td>
+                    <td>
+                        <button class="btn btn-primary" onclick="viewOrderDetails(${index})">
+                            <i class="fas fa-eye"></i> View
+                        </button>
+                        <button class="btn btn-danger" onclick="deleteOrder(${index})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+       
+        function loadAllBookings() {
+            const tbody = document.querySelector('#bookingsTable tbody');
+            tbody.innerHTML = bookings.map((booking, index) => `
+                <tr>
+                    <td>${booking.bookingId || `#${booking.bookingDate.substring(0, 10)}-${index + 1}`}</td>
+                    <td>
+                        <strong>${booking.farmer}</strong><br>
+                        <small>${booking.phone}</small>
+                    </td>
+                    <td>${booking.equipment}</td>
+                    <td>${booking.date}</td>
+                    <td>${booking.hours} hours</td>
+                    <td>
+                        <select onchange="updateBookingStatus(${index}, this.value)" class="status-select">
+                            <option value="pending" ${booking.status === 'pending' ? 'selected' : ''}>Pending</option>
+                            <option value="confirmed" ${booking.status === 'confirmed' ? 'selected' : ''}>Confirmed</option>
+                            <option value="completed" ${booking.status === 'completed' ? 'selected' : ''}>Completed</option>
+                            <option value="cancelled" ${booking.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
+                        </select>
+                    </td>
+                    <td>
+                        <button class="btn btn-primary" onclick="viewBookingDetails(${index})">
+                            <i class="fas fa-eye"></i> View
+                        </button>
+                        <button class="btn btn-danger" onclick="deleteBooking(${index})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+    
+        function updateOrderStatus(index, status) {
+            orders[index].status = status;
+            localStorage.setItem('orders', JSON.stringify(orders));
+            loadAllOrders();
+            updateDashboardStats();
+        }
+
+    
+        function updateBookingStatus(index, status) {
+            bookings[index].status = status;
+            localStorage.setItem('bookings', JSON.stringify(bookings));
+            loadAllBookings();
+            updateDashboardStats();
+        }
+
+        function viewOrderDetails(index) {
+            const order = orders[index];
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <span class="close">&times;</span>
+                    <h2>Order Details</h2>
+                    <div class="order-details">
+                        <div class="detail-group">
+                            <h3>Order Information</h3>
+                            <p><strong>Order ID:</strong> ${order.orderId || `#${order.orderDate.substring(0, 10)}-${index + 1}`}</p>
+                            <p><strong>Order Date:</strong> ${new Date(order.orderDate).toLocaleString()}</p>
+                            <p><strong>Status:</strong> ${order.status}</p>
+                            <p><strong>Total Amount:</strong> ₹${order.total}</p>
+                        </div>
+                        <div class="detail-group">
+                            <h3>Customer Information</h3>
+                            <p><strong>Name:</strong> ${order.customer.name}</p>
+                            <p><strong>Phone:</strong> ${order.customer.phone}</p>
+                            <p><strong>Email:</strong> ${order.customer.email || 'N/A'}</p>
+                            <p><strong>Address:</strong><br>
+                            ${order.customer.address.street}<br>
+                            ${order.customer.address.city}, ${order.customer.address.state}<br>
+                            PIN: ${order.customer.address.pincode}</p>
+                        </div>
+                        <div class="detail-group">
+                            <h3>Order Items</h3>
+                            <div class="order-items-table">
+                                ${order.items.map(item => `
+                                    <div class="order-item">
+                                        <span>${item.product}</span>
+                                        <span>₹${item.price}</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            modal.style.display = 'block';
+
+          
+            const closeBtn = modal.querySelector('.close');
+            closeBtn.onclick = () => modal.remove();
+            window.onclick = (event) => {
+                if (event.target === modal) {
+                    modal.remove();
+                }
+            };
+        }
+
+      
+        function viewBookingDetails(index) {
+            const booking = bookings[index];
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <span class="close">&times;</span>
+                    <h2>Booking Details</h2>
+                    <div class="booking-details">
+                        <div class="detail-group">
+                            <h3>Booking Information</h3>
+                            <p><strong>Booking ID:</strong> ${booking.bookingId || `#${booking.bookingDate.substring(0, 10)}-${index + 1}`}</p>
+                            <p><strong>Equipment:</strong> ${booking.equipment}</p>
+                            <p><strong>Date:</strong> ${booking.date}</p>
+                            <p><strong>Duration:</strong> ${booking.hours} hours</p>
+                            <p><strong>Total Cost:</strong> ₹${booking.totalCost}</p>
+                            <p><strong>Status:</strong> ${booking.status}</p>
+                        </div>
+                        <div class="detail-group">
+                            <h3>Farmer Information</h3>
+                            <p><strong>Name:</strong> ${booking.farmer}</p>
+                            <p><strong>Phone:</strong> ${booking.phone}</p>
+                            <p><strong>Field Address:</strong><br>${booking.address}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            modal.style.display = 'block';
+
+        
+            const closeBtn = modal.querySelector('.close');
+            closeBtn.onclick = () => modal.remove();
+            window.onclick = (event) => {
+                if (event.target === modal) {
+                    modal.remove();
+                }
+            };
+        }
+        function deleteOrder(index) {
+            if (confirm('Are you sure you want to delete this order?')) {
+                orders.splice(index, 1);
+                localStorage.setItem('orders', JSON.stringify(orders));
+                loadAllOrders();
+                updateDashboardStats();
+            }
+        }
+
+        function deleteBooking(index) {
+            if (confirm('Are you sure you want to delete this booking?')) {
+                bookings.splice(index, 1);
+                localStorage.setItem('bookings', JSON.stringify(bookings));
+                loadAllBookings();
+                updateDashboardStats();
+            }
+        }
+
+        function showAddProductModal() {
+            document.getElementById('addProductModal').style.display = 'block';
+        }
+
+        function showAddEquipmentModal() {
+            document.getElementById('addEquipmentModal').style.display = 'block';
+        }
+
+        document.querySelectorAll('.close').forEach(closeBtn => {
+            closeBtn.onclick = function() {
+                this.closest('.modal').style.display = 'none';
+            }
+        });
+
+        document.getElementById('addProductForm').onsubmit = function(e) {
+            e.preventDefault();
+            const newProduct = {
+                name: document.getElementById('productName').value,
+                category: document.getElementById('productCategory').value,
+                price: Number(document.getElementById('productPrice').value),
+                stock: Number(document.getElementById('productStock').value)
+            };
+            products.push(newProduct);
+            localStorage.setItem('products', JSON.stringify(products));
+            this.reset();
+            document.getElementById('addProductModal').style.display = 'none';
+            loadProducts();
+        };
+
+        document.getElementById('addEquipmentForm').onsubmit = function(e) {
+            e.preventDefault();
+            const newEquipment = {
+                name: document.getElementById('equipmentName').value,
+                type: document.getElementById('equipmentType').value,
+                rate: Number(document.getElementById('equipmentRate').value),
+                status: 'available'
+            };
+            equipment.push(newEquipment);
+            localStorage.setItem('equipment', JSON.stringify(equipment));
+            this.reset();
+            document.getElementById('addEquipmentModal').style.display = 'none';
+            loadEquipment();
+        };
+
+        function loadAdminProfile() {
+            const adminProfile = JSON.parse(localStorage.getItem('adminProfile') || '{}');
+            document.getElementById('adminName').value = adminProfile.name || '';
+            document.getElementById('adminEmail').value = adminProfile.email || '';
+            document.getElementById('adminPhone').value = adminProfile.phone || '';
+        }
+
+       
+        document.getElementById('adminProfileForm').onsubmit = function(e) {
+            e.preventDefault();
+            const adminProfile = {
+                name: document.getElementById('adminName').value,
+                email: document.getElementById('adminEmail').value,
+                phone: document.getElementById('adminPhone').value,
+                role: 'System Administrator'
+            };
+            localStorage.setItem('adminProfile', JSON.stringify(adminProfile));
+            alert('Profile updated successfully!');
+        };
+     
+        function loadProducts() {
+            const tbody = document.querySelector('#productsTable tbody');
+            tbody.innerHTML = products.map((product, index) => `
+                <tr>
+                    <td>${product.name}</td>
+                    <td>${product.category}</td>
+                    <td>${product.price}</td>
+                    <td>${product.stock}</td>
+                    <td>${product.image || 'Not set'}</td>
+                    <td>
+                        <button class="btn btn-primary" onclick="showEditProductModal(${index})">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button class="btn btn-danger" onclick="deleteProduct(${index})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+ 
+        function loadEquipment() {
+            const tbody = document.querySelector('#equipmentTable tbody');
+            tbody.innerHTML = equipment.map((item, index) => `
+                <tr>
+                    <td>${item.name}</td>
+                    <td>${item.type}</td>
+                    <td>${item.rate}</td>
+                    <td>${item.status}</td>
+                    <td>${item.image || 'Not set'}</td>
+                    <td>
+                        <button class="btn btn-primary" onclick="showEditEquipmentModal(${index})">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button class="btn btn-danger" onclick="deleteEquipment(${index})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+       
+        function showEditProductModal(index) {
+            const product = products[index];
+            document.getElementById('editProductIndex').value = index;
+            document.getElementById('editProductName').value = product.name;
+            document.getElementById('editProductCategory').value = product.category;
+            document.getElementById('editProductPrice').value = product.price;
+            document.getElementById('editProductStock').value = product.stock;
+            document.getElementById('editProductImage').value = product.image || '';
+            document.getElementById('editProductModal').style.display = 'block';
+        }
+
+       
+        function showEditEquipmentModal(index) {
+            const item = equipment[index];
+            document.getElementById('editEquipmentIndex').value = index;
+            document.getElementById('editEquipmentName').value = item.name;
+            document.getElementById('editEquipmentType').value = item.type;
+            document.getElementById('editEquipmentRate').value = item.rate;
+            document.getElementById('editEquipmentImage').value = item.image || '';
+            document.getElementById('editEquipmentModal').style.display = 'block';
+        }
+
+        
+        document.getElementById('editProductForm').onsubmit = function(e) {
+            e.preventDefault();
+            const index = document.getElementById('editProductIndex').value;
+            products[index] = {
+                name: document.getElementById('editProductName').value,
+                category: document.getElementById('editProductCategory').value,
+                price: Number(document.getElementById('editProductPrice').value),
+                stock: Number(document.getElementById('editProductStock').value),
+                image: document.getElementById('editProductImage').value
+            };
+            localStorage.setItem('products', JSON.stringify(products));
+            document.getElementById('editProductModal').style.display = 'none';
+            loadProducts();
+        };
+
+        document.getElementById('editEquipmentForm').onsubmit = function(e) {
+            e.preventDefault();
+            const index = document.getElementById('editEquipmentIndex').value;
+            equipment[index] = {
+                name: document.getElementById('editEquipmentName').value,
+                type: document.getElementById('editEquipmentType').value,
+                rate: Number(document.getElementById('editEquipmentRate').value),
+                status: equipment[index].status,
+                image: document.getElementById('editEquipmentImage').value
+            };
+            localStorage.setItem('equipment', JSON.stringify(equipment));
+            document.getElementById('editEquipmentModal').style.display = 'none';
+            loadEquipment();
+        };
+
+
+        function deleteProduct(index) {
+            if (confirm('Are you sure you want to delete this product?')) {
+                products.splice(index, 1);
+                localStorage.setItem('products', JSON.stringify(products));
+                loadProducts();
+            }
+        }
+
+  
+        function deleteEquipment(index) {
+            if (confirm('Are you sure you want to delete this equipment?')) {
+                equipment.splice(index, 1);
+                localStorage.setItem('equipment', JSON.stringify(equipment));
+                loadEquipment();
+            }
+        }
+
+        updateDashboardStats();
+        loadRecentOrders();
+        loadRecentBookings();
+
+        let currentBookingId = null;
+
+        function showStatusModal(bookingId) {
+            currentBookingId = bookingId;
+            document.getElementById('statusModal').style.display = 'block';
+        }
+
+        function updateStatus(newStatus) {
+            const bookings = JSON.parse(localStorage.getItem('bookings') || '[]');
+            const bookingIndex = parseInt(currentBookingId.substring(2)) - 1;
+            
+            if (bookingIndex >= 0 && bookingIndex < bookings.length) {
+                bookings[bookingIndex].status = newStatus;
+                localStorage.setItem('bookings', JSON.stringify(bookings));
+                
+         
+                loadAllBookings();
+                
+         
+                showNotification(`Booking status updated to ${newStatus.toUpperCase()}`);
+                
+             
+                document.getElementById('statusModal').style.display = 'none';
+            }
+        }
+
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            setTimeout(() => notification.remove(), 3000);
+        }
+    </script>
+</body>
+</html> 
