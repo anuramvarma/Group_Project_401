@@ -1,19 +1,16 @@
-// Initialize Firebase Authentication
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
 import { getFirestore, doc, setDoc, getDoc, collection } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
 
-// Firebase configuration
 const firebaseConfig = {
-    apiKey: "AIzaSyCgR3k3itG2MCHrGU4quF3jwSoM-U5Tw48", // Replace with your actual API key
+    apiKey: "AIzaSyCgR3k3itG2MCHrGU4quF3jwSoM-U5Tw48",
     authDomain: "farmgrower-7ba4f.firebaseapp.com",
     projectId: "farmgrower-7ba4f",
     storageBucket: "farmgrower-7ba4f.appspot.com",
     messagingSenderId: "106352953126118201066",
-    appId: "1:443080881556:web:4603af24a79459f8190b81" // Replace with your actual App ID
+    appId: "1:443080881556:web:4603af24a79459f8190b81" 
 };
 
-// Initialize Firebase
 let app;
 let auth;
 let db;
@@ -28,10 +25,8 @@ try {
     throw new Error("Failed to initialize Firebase. Please check your configuration.");
 }
 
-// Function to hash password
 async function hashPassword(password) {
     try {
-        // Using the Web Crypto API for password hashing
         const encoder = new TextEncoder();
         const data = encoder.encode(password);
         const hash = await crypto.subtle.digest('SHA-256', data);
@@ -44,25 +39,20 @@ async function hashPassword(password) {
     }
 }
 
-// Initialize admin account
 async function initializeAdminAccount() {
     try {
         const adminEmail = 'admin@farmgrower.com';
         const adminPassword = 'admin123';
         
-        // Check if admin account exists
         const adminDoc = await getDoc(doc(db, "users", "admin"));
         
         if (!adminDoc.exists()) {
             console.log("Creating admin account...");
-            // Create admin user in Firebase Auth
             const userCredential = await createUserWithEmailAndPassword(auth, adminEmail, adminPassword);
             const adminUser = userCredential.user;
             
-            // Hash admin password
             const hashedPassword = await hashPassword(adminPassword);
             
-            // Store admin data in Firestore
             await setDoc(doc(db, "users", "admin"), {
                 email: adminEmail,
                 passwordHash: hashedPassword,
@@ -78,10 +68,8 @@ async function initializeAdminAccount() {
     }
 }
 
-// Call initializeAdminAccount when the app starts
 initializeAdminAccount();
 
-// Register new user
 export async function registerUser(email, password, userData) {
     try {
         if (!auth || !db) {
@@ -91,23 +79,20 @@ export async function registerUser(email, password, userData) {
         console.log("Starting registration process...");
         console.log("User data:", { email, ...userData });
 
-        // Create user with email and password
         console.log("Creating user with email and password...");
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
         console.log("User created successfully:", user.uid);
 
-        // Hash the password before storing
         console.log("Hashing password...");
         const hashedPassword = await hashPassword(password);
 
-        // Store additional user data in Firestore
         console.log("Storing user data in Firestore...");
         const userRef = doc(db, "users", user.uid);
         const userDataToStore = {
             ...userData,
             email: email,
-            passwordHash: hashedPassword, // Store hashed password instead of plain text
+            passwordHash: hashedPassword,
             createdAt: new Date().toISOString(),
             role: 'farmer'
         };
@@ -116,13 +101,12 @@ export async function registerUser(email, password, userData) {
         await setDoc(userRef, userDataToStore);
         console.log("User data stored in Firestore successfully");
 
-        // Also store in SignUp-Details collection for backward compatibility
         console.log("Storing data in SignUp-Details collection...");
         const signUpRef = doc(collection(db, "SignUp-Details"));
         const signUpData = {
             Name: userData.name,
             Email: email,
-            PasswordHash: hashedPassword, // Store hashed password instead of plain text
+            PasswordHash: hashedPassword, 
             Phone: userData.phone,
             Address: userData.address,
             LandArea: userData.landArea,
@@ -165,7 +149,6 @@ export async function registerUser(email, password, userData) {
     }
 }
 
-// Login user
 export async function loginUser(email, password) {
     try {
         if (!auth || !db) {
@@ -177,7 +160,6 @@ export async function loginUser(email, password) {
         const user = userCredential.user;
         console.log("User logged in successfully:", user.uid);
 
-        // Get user data from Firestore
         console.log("Fetching user data from Firestore...");
         const userDoc = await getDoc(doc(db, "users", user.uid));
         if (!userDoc.exists()) {
@@ -217,7 +199,6 @@ export async function loginUser(email, password) {
     }
 }
 
-// Login admin
 export async function loginAdmin(email, password) {
     try {
         if (!auth || !db) {
@@ -229,7 +210,6 @@ export async function loginAdmin(email, password) {
         const user = userCredential.user;
         console.log("Admin logged in successfully:", user.uid);
 
-        // Get admin data from Firestore
         console.log("Fetching admin data from Firestore...");
         const adminDoc = await getDoc(doc(db, "users", "admin"));
         if (!adminDoc.exists()) {
@@ -269,7 +249,6 @@ export async function loginAdmin(email, password) {
     }
 }
 
-// Logout user
 export async function logoutUser() {
     try {
         if (!auth) {
@@ -286,12 +265,10 @@ export async function logoutUser() {
     }
 }
 
-// Get current user
 export function getCurrentUser() {
     return auth?.currentUser;
 }
 
-// Check if user is logged in
 export function isUserLoggedIn() {
     return !!auth?.currentUser;
 } 
